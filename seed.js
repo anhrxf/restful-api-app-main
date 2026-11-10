@@ -87,7 +87,8 @@ const KAPAL_DATA = [
 ];
 
 async function main() {
-  await mongoose.connect(process.env.DB_URI);
+  const uri = process.env.MONGODB_URI || process.env.DB_URI;
+  await mongoose.connect(uri);
   await Kapal.deleteMany({});
   await Dermaga.deleteMany({});
 

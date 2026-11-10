@@ -55,37 +55,44 @@
 
 ## 🚀 Panduan Pengujian Postman
 
-Header wajib untuk request `POST`, `PUT`, `DELETE`:
-- `x-api-key`: `isi-dengan-kunci-anda` (sesuai file `.env`)
+Header untuk request `POST`:
 - `Content-Type`: `application/json`
+*(Tidak diperlukan autentikasi / API key)*
 
-### Skenario Pengujian:
-1. **GET & POST Entity Pendukung (Dermaga)**:
-   - `POST /dermaga` (Body: JSON kode & nama)
+### Skenario Pengujian (Sesuai Soal UTS):
+1. **C1 - POST Entity Pendukung (Dermaga)**:
+   - `POST /dermaga` (Body: `{"kode": "DRM01", "nama": "Dermaga Benteng Kuto Besak"}`)
+   - Status: `201 Created`
+2. **C1 - GET Entity Pendukung (Dermaga)**:
    - `GET /dermaga`
-2. **POST Entity Utama (Kapal)**:
-   - `POST /kapal` (Body sesuai contoh di atas, masukkan `_id` Dermaga valid)
-3. **GET Filtering Entity Utama**:
+   - Status: `200 OK` (Array seluruh data Dermaga)
+3. **C1 - POST Entity Utama (Kapal)**:
+   - `POST /kapal` (Body sesuai contoh di atas dengan `dermagaId` valid)
+   - Status: `201 Created`
+4. **C2 - GET Seluruh Data Entity Utama (Kapal)**:
+   - `GET /kapal`
+   - Status: `200 OK` (Array data Kapal dengan default projection: `_id`, `kodeKapal`, `nama`, `kapasitas`, `jenis`)
+5. **C3 - GET Filtering Entity Utama**:
    - `GET /kapal?jenis=ketek`
-   - `GET /kapal?jenis=speedboat`
-4. **GET Detail Entity Utama**:
-   - `GET /kapal/:id` (mengembalikan data kapal dengan populate dermagaId)
-5. **Skenario Galat (Error Handling)**:
-   - POST duplikat `kodeKapal` yang sudah ada (mengembalikan status 400 galat duplikat)
-   - POST data tanpa field wajib atau `kapasitas: 0` (mengembalikan status 400 galat validasi)
-6. **GET Projection Entity Utama**:
-   - `GET /kapal?fields=kodeKapal,nama,jenis`
+   - Status: `200 OK` (Hanya data kapal dengan jenis persis sama; `[]` jika tidak ada)
+6. **C4 - GET Detail Entity Utama**:
+   - `GET /kapal/:id`
+   - Status: `200 OK` (Mengirim seluruh field lengkap dengan `dermagaId` ter-populate `{ kode, nama }`)
+7. **Error Handling (A3)**:
+   - **CastError (ID salah format)**: `GET /kapal/123` -> Status `400` (`{"message": "Format ID tidak valid"}`)
+   - **ID tidak ada**: `GET /kapal/507f1f77bcf86cd799439011` -> Status `404` (`{"message": "Data kapal tidak ditemukan"}`)
+   - **Duplikat kodeKapal (E11000)**: POST `kodeKapal` yang sudah ada -> Status `409`
+   - **ValidationError**: POST data tanpa field wajib atau `kapasitas: 0` -> Status `400` (`{"message": "Data tidak valid", "detail": [...]}`)
 
 ---
 
 ## 🛠️ Cara Menjalankan
 
-1. Pastikan MongoDB sudah berjalan di lokal atau siapkan URI MongoDB Atlas di `.env`:
+1. Konfigurasi di berkas `.env`:
    ```env
    PORT=3000
-   API_KEY=isi-dengan-kunci-anda
+   MONGODB_URI=mongodb://localhost:27017/paw2
    CORS_ORIGIN=http://localhost:5173
-   DB_URI=mongodb://localhost:27017/paw2
    ```
 2. Jalankan perintah instalasi (jika belum):
    ```bash
