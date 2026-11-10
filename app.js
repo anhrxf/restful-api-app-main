@@ -6,9 +6,9 @@ const cors = require('cors');
 const logger = require('./middlewares/logger');
 const { notFoundHandler, errorHandler } = require('./middlewares/errorHandler');
 
-const mahasiswaRoutes = require('./routes/mahasiswaRoutes');
+const kapalRoutes = require('./routes/kapalRoutes');
+const dermagaRoutes = require('./routes/dermagaRoutes');
 const fakultasRoutes = require('./routes/fakultasRoutes');
-const prodiRoutes = require('./routes/prodiRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -27,9 +27,9 @@ app.get('/', (req, res) => {
 });
 
 // ---------- Route per modul ----------
-app.use('/mahasiswa', mahasiswaRoutes);
+app.use('/kapal', kapalRoutes);
+app.use('/dermaga', dermagaRoutes);
 app.use('/fakultas', fakultasRoutes);
-app.use('/prodi', prodiRoutes);
 
 // ---------- Handler 404 dan error handler (paling bawah) ----------
 app.use(notFoundHandler);

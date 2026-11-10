@@ -1,36 +1,105 @@
 // seed.js
-// Mengisi basis data dengan 3 prodi dan 25 mahasiswa. Aman dijalankan berulang:
-// data lama dihapus dulu.
+// Mengisi basis data dengan data dermaga dan kapal wisata sungai.
+// Aman dijalankan berulang: data lama dihapus dulu.
 require('dotenv').config({ quiet: true });
 const mongoose = require('mongoose');
-const Prodi = require('./models/prodiModel');
-const Mahasiswa = require('./models/mahasiswaModel');
+const Dermaga = require('./models/dermagaModel');
+const Kapal = require('./models/kapalModel');
 
-const NAMA = ['Andi', 'Budi', 'Citra', 'Dewi', 'Eko', 'Fitri', 'Gita', 'Hadi', 'Indra', 'Joko',
-  'Kiki', 'Lina', 'Maya', 'Nanda', 'Oka', 'Putri', 'Qori', 'Rina', 'Sari', 'Tono',
-  'Umar', 'Vina', 'Wawan', 'Yuni', 'Zaki'];
-const KOTA = ['Palembang', 'Indralaya', 'Prabumulih', 'Lubuklinggau'];
+const DERMAGA_DATA = [
+  { kode: 'DRM01', nama: 'Dermaga Benteng Kuto Besak' },
+  { kode: 'DRM02', nama: 'Dermaga 16 Ilir' },
+  { kode: 'DRM03', nama: 'Dermaga Pulau Kemaro' },
+  { kode: 'DRM04', nama: 'Dermaga Tangga Buntung' },
+];
+
+const KAPAL_DATA = [
+  {
+    kodeKapal: 'KPL-01',
+    nama: 'Speedboat Musi Kilat 01',
+    kapasitas: 12,
+    jenis: 'speedboat',
+    rute: { dermagaAwal: 'Dermaga Benteng Kuto Besak', dermagaTujuan: 'Dermaga 16 Ilir' },
+  },
+  {
+    kodeKapal: 'KPL-02',
+    nama: 'Ketek Sriwijaya Bahari',
+    kapasitas: 8,
+    jenis: 'ketek',
+    rute: { dermagaAwal: 'Dermaga 16 Ilir', dermagaTujuan: 'Dermaga Pulau Kemaro' },
+  },
+  {
+    kodeKapal: 'KPL-03',
+    nama: 'Kapal Wisata Putri Kemaro',
+    kapasitas: 45,
+    jenis: 'kapal_wisata',
+    rute: { dermagaAwal: 'Dermaga Benteng Kuto Besak', dermagaTujuan: 'Dermaga Pulau Kemaro' },
+  },
+  {
+    kodeKapal: 'KPL-04',
+    nama: 'Speedboat Ampera Express',
+    kapasitas: 15,
+    jenis: 'speedboat',
+    rute: { dermagaAwal: 'Dermaga Benteng Kuto Besak', dermagaTujuan: 'Dermaga Tangga Buntung' },
+  },
+  {
+    kodeKapal: 'KPL-05',
+    nama: 'Ketek Wong Kito',
+    kapasitas: 6,
+    jenis: 'ketek',
+    rute: { dermagaAwal: 'Dermaga Tangga Buntung', dermagaTujuan: 'Dermaga 16 Ilir' },
+  },
+  {
+    kodeKapal: 'KPL-06',
+    nama: 'Kapal Wisata Pesona Musi',
+    kapasitas: 60,
+    jenis: 'kapal_wisata',
+    rute: { dermagaAwal: 'Dermaga Benteng Kuto Besak', dermagaTujuan: 'Dermaga Pulau Kemaro' },
+  },
+  {
+    kodeKapal: 'KPL-07',
+    nama: 'Ketek Berkah Sungai',
+    kapasitas: 10,
+    jenis: 'ketek',
+    rute: { dermagaAwal: 'Dermaga 16 Ilir', dermagaTujuan: 'Dermaga Benteng Kuto Besak' },
+  },
+  {
+    kodeKapal: 'KPL-08',
+    nama: 'Speedboat Musi Jaya',
+    kapasitas: 14,
+    jenis: 'speedboat',
+    rute: { dermagaAwal: 'Dermaga 16 Ilir', dermagaTujuan: 'Dermaga Tangga Buntung' },
+  },
+  {
+    kodeKapal: 'KPL-09',
+    nama: 'Kapal Wisata Belido Emas',
+    kapasitas: 50,
+    jenis: 'kapal_wisata',
+    rute: { dermagaAwal: 'Dermaga Benteng Kuto Besak', dermagaTujuan: 'Dermaga 16 Ilir' },
+  },
+  {
+    kodeKapal: 'KPL-10',
+    nama: 'Ketek Bujang Gadis',
+    kapasitas: 8,
+    jenis: 'ketek',
+    rute: { dermagaAwal: 'Dermaga Tangga Buntung', dermagaTujuan: 'Dermaga Benteng Kuto Besak' },
+  },
+];
 
 async function main() {
   await mongoose.connect(process.env.DB_URI);
-  await Mahasiswa.deleteMany({});
-  await Prodi.deleteMany({});
+  await Kapal.deleteMany({});
+  await Dermaga.deleteMany({});
 
-  const prodi = await Prodi.insertMany([
-    { kode: 'SI', nama: 'Sistem Informasi' },
-    { kode: 'TI', nama: 'Teknik Informatika' },
-    { kode: 'MI', nama: 'Manajemen Informatika' },
-  ]);
+  const dermaga = await Dermaga.insertMany(DERMAGA_DATA);
 
-  const mahasiswa = NAMA.map((nama, i) => ({
-    nama,
-    nim: String(2301001 + i),
-    alamat: { jalan: `Jl. Contoh No. ${i + 1}`, kota: KOTA[i % KOTA.length] },
-    prodiId: prodi[i % 3]._id, // SI, TI, MI bergantian
+  const kapal = KAPAL_DATA.map((k, i) => ({
+    ...k,
+    dermagaId: dermaga[i % dermaga.length]._id,
   }));
-  await Mahasiswa.insertMany(mahasiswa);
+  await Kapal.insertMany(kapal);
 
-  console.log(`Seed selesai: ${prodi.length} prodi, ${mahasiswa.length} mahasiswa`);
+  console.log(`Seed selesai: ${dermaga.length} dermaga, ${kapal.length} kapal`);
   await mongoose.disconnect();
 }
 
