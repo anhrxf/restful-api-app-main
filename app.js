@@ -8,7 +8,6 @@ const { notFoundHandler, errorHandler } = require('./middlewares/errorHandler');
 
 const kapalRoutes = require('./routes/kapalRoutes');
 const dermagaRoutes = require('./routes/dermagaRoutes');
-const fakultasRoutes = require('./routes/fakultasRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -17,7 +16,7 @@ const PORT = process.env.PORT || 3000;
 app.use(logger);
 app.use(cors({
   origin: process.env.CORS_ORIGIN,
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  methods: ['GET', 'POST'],
 }));
 app.use(express.json());
 
@@ -29,22 +28,19 @@ app.get('/', (req, res) => {
 // ---------- Route per modul ----------
 app.use('/kapal', kapalRoutes);
 app.use('/dermaga', dermagaRoutes);
-app.use('/fakultas', fakultasRoutes);
 
 // ---------- Handler 404 dan error handler (paling bawah) ----------
 app.use(notFoundHandler);
 app.use(errorHandler);
 
-// app.listen(PORT, () => {
-//   console.log(`Server berjalan di http://localhost:${PORT}`);
-// });
+const MONGODB_URI = process.env.MONGODB_URI || process.env.DB_URI;
 
-mongoose.connect(process.env.DB_URI)
+mongoose.connect(MONGODB_URI)
   .then(() => {
     console.log('Terhubung ke MongoDB');
     app.listen(PORT, () => console.log(`Server berjalan di http://localhost:${PORT}`));
   })
   .catch((err) => {
-    console.error('Gagal terhubung:', err.message);
+    console.error('Gagal terhubung ke MongoDB:', err.message);
     process.exit(1);
   });
